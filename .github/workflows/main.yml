@@ -1,0 +1,64 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  test-backend:
+    name: Test Backend
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'  # .NET version
+      
+      - name: Install dependencies
+        run: dotnet restore ./ChasChallenge-G4-V3.Server/ChasChallenge-G4-V3.Server.csproj
+
+      - name: Install dependencies for testing
+        run: dotnet restore ./ChasChallenge-G4-V3-ServerTests/ChasChallenge-G4-V3-ServerTests.csproj
+
+      - name: Build project
+        run: dotnet build ./ChasChallenge-G4-V3.Server/ChasChallenge-G4-V3.Server.csproj
+
+      - name: Run tests for ChasChallenge-G4-V3-ServerTests
+        run: dotnet test --verbosity detailed ./ChasChallenge-G4-V3-ServerTests/ChasChallenge-G4-V3-ServerTests.csproj
+
+  publish-backend:
+      name: Publish Backend
+      runs-on: ubuntu-latest
+      needs: test-backend  # Ensure publish runs after the tests are successful
+  
+      steps:
+        - name: Checkout repository
+          uses: actions/checkout@v4
+  
+        - name: Set up .NET
+          uses: actions/setup-dotnet@v4
+          with:
+            dotnet-version: '8.0.x'  # .NET version
+  
+        - name: Install dependencies
+          run: dotnet restore ./ChasChallenge-G4-V3.Server/ChasChallenge-G4-V3.Server.csproj
+  
+        - name: Publish project
+          run: dotnet publish --configuration Release --output ./publish ./ChasChallenge-G4-V3.Server/ChasChallenge-G4-V3.Server.csproj
+  
+        - name: Build Docker image
+          run: docker build -t ${{ secrets.DOCKER_USERNAME }}/chaschallenge-g4-v3-server:latest -f ./ChasChallenge-G4-V3/ChasChallenge-G4-V3.Server/Dockerfile .
+  
+        - name: Login to Docker Hub
+          uses: docker/login-action@v2
+          with:
+            username: ${{ secrets.DOCKER_USERNAME }}
+            password: ${{ secrets.DOCKER_TOKEN }}
+  
+        - name: Push Docker image to Docker Hub
+          run: docker push ${{ secrets.DOCKER_USERNAME }}/chaschallenge-g4-v3-server:latest
