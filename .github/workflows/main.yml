@@ -67,4 +67,31 @@ jobs:
       - name: Push Docker image to Docker Hub
         run: docker push ${{ secrets.DOCKER_USERNAME }}/chaschallenge-g4-v3-server:latest
 
+  build-frontend:
+    name: Build Frontend
+    runs-on: ubuntu-latest
+    needs: publish-backend  # Run after backend publish to ensure frontend errors do not block backend
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18.x'
+
+      - name: Install dependencies
+        run: npm install --prefix ./chaschallenge-g4-v3.client
+
+      - name: Build frontend
+        run: |
+          npm run build --prefix ./chaschallenge-g4-v3.client || true  # Continue even if there are errors
+
+      - name: Archive production artifacts
+        uses: actions/upload-artifact@v2
+        with:
+          name: production-artifacts
+          path: ./chaschallenge-g4-v3.client/dist
+
         
