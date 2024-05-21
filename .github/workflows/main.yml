@@ -62,6 +62,8 @@ jobs:
   
         - name: Build Docker image
           run: docker build -t ${{ secrets.DOCKER_USERNAME }}/chaschallenge-g4-v3-server:latest -f ./ChasChallenge-G4-V3.Server/Dockerfile .
+
+
   
         - name: Push Docker image to Docker Hub
           run: docker push ${{ secrets.DOCKER_USERNAME }}/chaschallenge-g4-v3-server:latest
