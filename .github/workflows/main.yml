@@ -48,6 +48,9 @@ jobs:
       - name: Install dependencies
         run: dotnet restore ./ChasChallenge-G4-V3.Server/ChasChallenge-G4-V3.Server.csproj
 
+      - name: Build project
+        run: dotnet build ./ChasChallenge-G4-V3.Server/ChasChallenge-G4-V3.Server.csproj
+
       - name: Publish project
         run: dotnet publish --configuration Release --output ./publish ./ChasChallenge-G4-V3.Server/ChasChallenge-G4-V3.Server.csproj
 
