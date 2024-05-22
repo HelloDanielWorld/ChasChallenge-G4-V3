@@ -26,10 +26,10 @@ jobs:
         run: dotnet restore ./ChasChallenge-G4-V3-ServerTests/ChasChallenge-G4-V3-ServerTests.csproj
 
       - name: Build project
-        run: dotnet build ./ChasChallenge-G4-V3.Server/ChasChallenge-G4-V3.Server.csproj
+        run: dotnet build --no-restore ./ChasChallenge-G4-V3.Server/ChasChallenge-G4-V3.Server.csproj
 
       - name: Run tests for ChasChallenge-G4-V3-ServerTests
-        run: dotnet test --verbosity detailed ./ChasChallenge-G4-V3-ServerTests/ChasChallenge-G4-V3-ServerTests.csproj
+        run: dotnet test --no-restore --verbosity detailed ./ChasChallenge-G4-V3-ServerTests/ChasChallenge-G4-V3-ServerTests.csproj
 
   publish-backend:
     name: Publish Backend
@@ -49,10 +49,10 @@ jobs:
         run: dotnet restore ./ChasChallenge-G4-V3.Server/ChasChallenge-G4-V3.Server.csproj
 
       - name: Build project
-        run: dotnet build ./ChasChallenge-G4-V3.Server/ChasChallenge-G4-V3.Server.csproj
+        run: dotnet build --no-restore ./ChasChallenge-G4-V3.Server/ChasChallenge-G4-V3.Server.csproj
 
       - name: Publish project
-        run: dotnet publish --configuration Release --output ./publish ./ChasChallenge-G4-V3.Server/ChasChallenge-G4-V3.Server.csproj
+        run: dotnet publish --no-restore --configuration Release --output ./publish ./ChasChallenge-G4-V3.Server/ChasChallenge-G4-V3.Server.csproj
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v2
@@ -68,31 +68,3 @@ jobs:
 
       - name: Push Docker image to Docker Hub
         run: docker push ${{ secrets.DOCKER_USERNAME }}/chaschallenge-g4-v3-server:latest
-
-  build-frontend:
-    name: Build Frontend
-    runs-on: ubuntu-latest
-    needs: publish-backend
-
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-
-      - name: Set up Node.js
-        uses: actions/setup-node@v3
-        with:
-          node-version: '18.x'
-
-      - name: Install dependencies
-        run: npm install --prefix ./chaschallenge-g4-v3.client
-
-      - name: Build frontend
-        run: |
-          npm run build --prefix ./chaschallenge-g4-v3.client || true  # Continue even if there are errors
-
-      - name: Archive production artifacts
-        if: success() || failure()
-        uses: actions/upload-artifact@v2
-        with:
-          name: production-artifacts
-          path: ./chaschallenge-g4-v3.client/dist
