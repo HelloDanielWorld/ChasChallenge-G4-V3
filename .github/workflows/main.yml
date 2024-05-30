@@ -30,3 +30,24 @@ jobs:
 
       - name: Run tests for ChasChallenge-G4-V3-ServerTests
         run: dotnet test --no-restore --verbosity detailed ./ChasChallenge-G4-V3-ServerTests/ChasChallenge-G4-V3-ServerTests.csproj
+
+  test-frontend:
+    name: Test Frontend
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '16.x'  # Specify the Node.js version you are using
+
+      - name: Install dependencies
+        run: npm install
+        working-directory: ./chaschallenge-g4-v3.client  # Path to the frontend project directory
+
+      - name: Run frontend tests
+        run: npm test
+        working-directory: ./chaschallenge-g4-v3.client  # Path to the frontend project directory  
